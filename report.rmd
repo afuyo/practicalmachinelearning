@@ -13,18 +13,22 @@ In this project, we will use data from accelerometers on the belt, forearm, arm,
 
 ```{r, cache=T}
 library(caret)
+library(rpart)
+library(rpart.plot)
+library(randomForest)
+library(corrplot)
 ```
 
 ## Read the data
 
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 trainUrl<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
 testUrl<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
 train<-read.csv(trainUrl)
 test<-read.csv(testUrl)
 ```
 ##Clean the data
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 #Clean the data
 #Get rid of not complete cases
 train <- train[, colSums(is.na(train)) == 0] 
@@ -41,16 +45,17 @@ testCln <- test[, sapply(test, is.numeric)]
 
 ```
 ##Create training and test data sets
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 set.seed(3334)
-inTrain <- createDataPartition(trainCleaned$classe, p=0.70, list=F)
-trainDataSet <- trainCleaned[inTrain, ]
-testDataSet <- trainCleaned[-inTrain, ]
+inTrain <- createDataPartition(trainCln$classe, p=0.70, list=F)
+trainDataSet <- trainCln[inTrain, ]
+testDataSet <- trainCln[-inTrain, ]
 
 
 ```
 ##predictive model
-```{r, echo=FALSE}
+```{r, echo=TRUE}
+controlRf <- trainControl(method="cv", 5)
 modelRf <- train(classe ~ ., data=trainDataSet, method="rf", trControl=controlRf, ntree=250)
 modelRf
 ```
