@@ -22,5 +22,11 @@ set.seed(3334)
 inTrain <- createDataPartition(trainCln$classe, p=0.70, list=F)
 trainDataSet <- trainCln[inTrain, ]
 testDataSet <- trainCln[-inTrain, ]
+controlRf <- trainControl(method="cv", 5)
 modelRf <- train(classe ~ ., data=trainDataSet, method="rf", trControl=controlRf, ntree=250)
 modelRf
+#wihtout cross validation
+model<- randomForest(classe~.,data=trainDataSet)
+model
+predict1<-predict(model,testDataSet)
+confusionMatrix(testData$classe,predict1)
