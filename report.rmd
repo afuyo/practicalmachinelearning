@@ -2,7 +2,9 @@
 title: "Practical Machine Learning"
 author: "Artur Mrozowski"
 date: "28. jan. 2016"
-output: html_document
+output: 
+  html_document: 
+    keep_md: yes
 ---
 
 ### Introduction  
@@ -11,9 +13,11 @@ Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible t
 In this project, we will use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants to predict the manner in which they did the exercise.  
 
 
-```{r, cache=T}
+```{r, echo=FALSE}
 library(caret)
-
+library(ggplot2)
+library(rpart)
+library(rpart.plot)
 ```
 
 ## Read the data
@@ -25,8 +29,8 @@ train<-read.csv(trainUrl)
 test<-read.csv(testUrl)
 ```
 ##Clean the data
+The columns that contain NA values need to be removed. Also the columms that don't make much sensne in the prediction model and create unecessary noise.
 ```{r, echo=TRUE}
-#Clean the data
 #Get rid of not complete cases
 train <- train[, colSums(is.na(train)) == 0] 
 test <- test[, colSums(is.na(test)) == 0] 
@@ -42,6 +46,7 @@ testCln <- test[, sapply(test, is.numeric)]
 
 ```
 ##Create training and test data sets
+By splitting the data into training(70%) and validation(30%) we'll be able to validate the model.  
 ```{r, echo=TRUE}
 set.seed(3334)
 inTrain <- createDataPartition(trainCln$classe, p=0.70, list=F)
@@ -50,9 +55,65 @@ testDataSet <- trainCln[-inTrain, ]
 
 
 ```
-##predictive model
+#Train the model randomforest
+In random forests, there is no need for cross-validation or a separate test set to get an unbiased estimate of the test set error. It is estimated internally, during the run, as follows:
+
+Each tree is constructed using a different bootstrap sample from the original data. About one-third of the cases are left out of the bootstrap sample and not used in the construction of the kth tree.   
 ```{r, echo=TRUE}
-controlRf <- trainControl(method="cv", 5)
-modelRf <- train(classe ~ ., data=trainDataSet, method="rf", trControl=controlRf, ntree=250)
+modelRf <- train(classe ~ ., data=trainDataSet, method="rf", ntree=250)
 modelRf
 ```
+#Variable importance
+```{r}
+varImp(modelRf)
+ggplot(varImp(modelRf))
+
+```
+
+we can see that rooll_belt and yaw_belt  are by far the most important variables
+
+#accuracy plot
+```{r}
+plot.train(modelRf)
+```
+
+Accuracy is 99,37%
+
+Let's evaluate model results in confusion matrix after estimating the performance on the validation data set
+```{r, echo=TRUE}
+predRf<-predict(modelRf,testDataSet)
+confusionMatrix(testDataSet$classe,predRf)
+```
+
+Let's reduce number of variable to the most importan ones. Let's reduce training and testing set accordingly and validation set on which we make the predictions for the classe variable.
+```{r}
+
+trainReduced<-trainDataSet[,c("roll_belt","yaw_belt","magnet_dumbbell_z","pitch_belt","magnet_dumbbell_y","magnet_dumbbell_x","pitch_forearm","classe")]
+testReduced<-testDataSet[,c("roll_belt","yaw_belt","magnet_dumbbell_z","pitch_belt","magnet_dumbbell_y","magnet_dumbbell_x","pitch_forearm","classe")]
+testClnReduced<-testCln[,c("roll_belt","yaw_belt","magnet_dumbbell_z","pitch_belt","magnet_dumbbell_y","magnet_dumbbell_x","pitch_forearm")]
+
+```
+
+Now let's train the model on the reduced data set.
+```{r}
+modelRfReduced <- train(classe ~ ., data=trainReduced, method="rf", ntree=250)
+```
+Prediciton for the new model with reduced number of variables.
+```{r}
+predReduced<-predict(modelRfReduced,testReduced)
+confusionMatrix(testReduced$classe,predReduced)
+```
+#Results
+
+```{r}
+resReduced<-predict(modelRfReduced,testClnReduced)
+resReduced
+```
+
+#Visualizaiton of the tree model
+```{r}
+treeModel <- rpart(classe ~ ., data=trainReduced, method="class")
+ prp(treeModel)
+ 
+```
+
