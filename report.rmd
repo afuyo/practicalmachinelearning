@@ -56,7 +56,7 @@ testDataSet <- trainCln[-inTrain, ]
 
 ```
 #Train the model randomforest
-In random forests, there is no need for cross-validation or a separate test set to get an unbiased estimate of the test set error. It is estimated internally, during the run, as follows:
+In random forests, there is no need for cross-validation . It is estimated internally, during the run, as follows:
 
 Each tree is constructed using a different bootstrap sample from the original data. About one-third of the cases are left out of the bootstrap sample and not used in the construction of the kth tree.   
 ```{r, echo=TRUE}
@@ -77,7 +77,7 @@ we can see that rooll_belt and yaw_belt  are by far the most important variables
 plot.train(modelRf)
 ```
 
-Accuracy is 99,37%
+Accuracy is 99,4%
 
 Let's evaluate model results in confusion matrix after estimating the performance on the validation data set
 ```{r, echo=TRUE}
@@ -102,7 +102,17 @@ Prediciton for the new model with reduced number of variables.
 ```{r}
 predReduced<-predict(modelRfReduced,testReduced)
 confusionMatrix(testReduced$classe,predReduced)
+oose <- 1 - as.numeric(confusionMatrix(testReduced$classe,predReduced)$overall[1])
+oose
 ```
+
+Out of sample error
+```{r}
+oose <- 1 - as.numeric(confusionMatrix(testReduced$classe,predReduced)$overall[1])
+oose
+```
+
+
 #Results
 
 ```{r}

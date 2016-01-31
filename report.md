@@ -73,7 +73,7 @@ trainDataSet <- trainCln[inTrain, ]
 testDataSet <- trainCln[-inTrain, ]
 ```
 #Train the model randomforest
-In random forests, there is no need for cross-validation or a separate test set to get an unbiased estimate of the test set error. It is estimated internally, during the run, as follows:
+In random forests, there is no need for cross-validation . It is estimated internally, during the run, as follows:
 
 Each tree is constructed using a different bootstrap sample from the original data. About one-third of the cases are left out of the bootstrap sample and not used in the construction of the kth tree.   
 
@@ -182,7 +182,7 @@ plot.train(modelRf)
 
 ![](report_files/figure-html/unnamed-chunk-7-1.png)
 
-Accuracy is 99,37%
+Accuracy is 99,4%
 
 Let's evaluate model results in confusion matrix after estimating the performance on the validation data set
 
@@ -278,6 +278,28 @@ confusionMatrix(testReduced$classe,predReduced)
 ## Detection Prevalence   0.2845   0.1935   0.1743   0.1638   0.1839
 ## Balanced Accuracy      0.9929   0.9882   0.9771   0.9915   0.9971
 ```
+
+```r
+oose <- 1 - as.numeric(confusionMatrix(testReduced$classe,predReduced)$overall[1])
+oose
+```
+
+```
+## [1] 0.01648258
+```
+
+Out of sample error
+
+```r
+oose <- 1 - as.numeric(confusionMatrix(testReduced$classe,predReduced)$overall[1])
+oose
+```
+
+```
+## [1] 0.01648258
+```
+
+
 #Results
 
 
@@ -298,5 +320,5 @@ treeModel <- rpart(classe ~ ., data=trainReduced, method="class")
  prp(treeModel)
 ```
 
-![](report_files/figure-html/unnamed-chunk-13-1.png)
+![](report_files/figure-html/unnamed-chunk-14-1.png)
 
