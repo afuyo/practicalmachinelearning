@@ -56,11 +56,13 @@ testDataSet <- trainCln[-inTrain, ]
 
 ```
 #Train the model randomforest
-In random forests, there is no need for cross-validation . It is estimated internally, during the run, as follows:
+We will use **Random Forest** algorithm
 
-Each tree is constructed using a different bootstrap sample from the original data. About one-third of the cases are left out of the bootstrap sample and not used in the construction of the kth tree.   
+In random forests each tree is constructed using a different bootstrap sample from the original data. About one-third of the cases are left out of the bootstrap sample and not used in the construction of the kth tree.
+We will use **5-fold cross validation** when applying the algorithm.
 ```{r, echo=TRUE}
-modelRf <- train(classe ~ ., data=trainDataSet, method="rf", ntree=250)
+controlRf <- trainControl(method="cv", 5)
+modelRf <- train(classe ~ ., data=trainDataSet, method="rf",trControl=controlRf, ntree=250)
 modelRf
 ```
 #Variable importance

@@ -73,12 +73,14 @@ trainDataSet <- trainCln[inTrain, ]
 testDataSet <- trainCln[-inTrain, ]
 ```
 #Train the model randomforest
-In random forests, there is no need for cross-validation . It is estimated internally, during the run, as follows:
+We will use **Random Forest** algorithm
 
-Each tree is constructed using a different bootstrap sample from the original data. About one-third of the cases are left out of the bootstrap sample and not used in the construction of the kth tree.   
+In random forests each tree is constructed using a different bootstrap sample from the original data. About one-third of the cases are left out of the bootstrap sample and not used in the construction of the kth tree.
+We will use **5-fold cross validation** when applying the algorithm.
 
 ```r
-modelRf <- train(classe ~ ., data=trainDataSet, method="rf", ntree=250)
+controlRf <- trainControl(method="cv", 5)
+modelRf <- train(classe ~ ., data=trainDataSet, method="rf",trControl=controlRf, ntree=250)
 ```
 
 ```
@@ -120,17 +122,17 @@ modelRf
 ##     5 classes: 'A', 'B', 'C', 'D', 'E' 
 ## 
 ## No pre-processing
-## Resampling: Bootstrapped (25 reps) 
-## Summary of sample sizes: 13737, 13737, 13737, 13737, 13737, 13737, ... 
+## Resampling: Cross-Validated (5 fold) 
+## Summary of sample sizes: 10990, 10991, 10990, 10988, 10989 
 ## Resampling results across tuning parameters:
 ## 
 ##   mtry  Accuracy   Kappa      Accuracy SD  Kappa SD   
-##    2    0.9882025  0.9850716  0.001694686  0.002134850
-##   27    0.9882897  0.9851828  0.001714376  0.002162997
-##   52    0.9791543  0.9736255  0.004128074  0.005208552
+##    2    0.9906821  0.9882117  0.002632884  0.003332714
+##   27    0.9901723  0.9875668  0.002820579  0.003570059
+##   52    0.9829646  0.9784479  0.003885841  0.004917619
 ## 
 ## Accuracy was used to select the optimal model using  the largest value.
-## The final value used for the model was mtry = 27.
+## The final value used for the model was mtry = 2.
 ```
 #Variable importance
 
@@ -144,26 +146,26 @@ varImp(modelRf)
 ##   only 20 most important variables shown (out of 52)
 ## 
 ##                      Overall
-## roll_belt            100.000
-## pitch_forearm         55.485
-## yaw_belt              53.893
-## pitch_belt            44.559
-## roll_forearm          43.495
-## magnet_dumbbell_z     43.157
-## magnet_dumbbell_y     42.898
-## accel_dumbbell_y      22.257
-## magnet_dumbbell_x     17.015
-## accel_forearm_x       16.356
-## magnet_belt_z         16.172
-## roll_dumbbell         15.988
-## accel_belt_z          15.120
-## magnet_forearm_z      13.903
-## accel_dumbbell_z      13.713
-## total_accel_dumbbell  13.151
-## gyros_belt_z          10.634
-## yaw_arm               10.451
-## magnet_belt_y         10.219
-## magnet_belt_x          9.334
+## roll_belt             100.00
+## yaw_belt               79.21
+## magnet_dumbbell_z      65.89
+## magnet_dumbbell_y      60.70
+## pitch_belt             60.21
+## pitch_forearm          57.37
+## magnet_dumbbell_x      54.21
+## roll_forearm           49.95
+## accel_dumbbell_y       43.91
+## accel_belt_z           41.20
+## magnet_belt_y          41.19
+## magnet_belt_z          40.97
+## roll_dumbbell          39.93
+## accel_dumbbell_z       35.18
+## roll_arm               31.86
+## accel_forearm_x        29.77
+## accel_arm_x            28.29
+## total_accel_dumbbell   28.22
+## accel_dumbbell_x       27.94
+## gyros_belt_z           27.50
 ```
 
 ```r
@@ -197,32 +199,32 @@ confusionMatrix(testDataSet$classe,predRf)
 ##           Reference
 ## Prediction    A    B    C    D    E
 ##          A 1674    0    0    0    0
-##          B   10 1126    3    0    0
-##          C    0    7 1014    5    0
-##          D    0    0    3  960    1
-##          E    0    0    3    1 1078
+##          B    7 1129    3    0    0
+##          C    0    8 1017    1    0
+##          D    0    0   14  947    3
+##          E    0    0    1    0 1081
 ## 
 ## Overall Statistics
 ##                                           
-##                Accuracy : 0.9944          
-##                  95% CI : (0.9921, 0.9961)
-##     No Information Rate : 0.2862          
+##                Accuracy : 0.9937          
+##                  95% CI : (0.9913, 0.9956)
+##     No Information Rate : 0.2856          
 ##     P-Value [Acc > NIR] : < 2.2e-16       
 ##                                           
-##                   Kappa : 0.9929          
+##                   Kappa : 0.992           
 ##  Mcnemar's Test P-Value : NA              
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            0.9941   0.9938   0.9912   0.9938   0.9991
-## Specificity            1.0000   0.9973   0.9975   0.9992   0.9992
-## Pos Pred Value         1.0000   0.9886   0.9883   0.9959   0.9963
-## Neg Pred Value         0.9976   0.9985   0.9981   0.9988   0.9998
-## Prevalence             0.2862   0.1925   0.1738   0.1641   0.1833
-## Detection Rate         0.2845   0.1913   0.1723   0.1631   0.1832
+## Sensitivity            0.9958   0.9930   0.9826   0.9989   0.9972
+## Specificity            1.0000   0.9979   0.9981   0.9966   0.9998
+## Pos Pred Value         1.0000   0.9912   0.9912   0.9824   0.9991
+## Neg Pred Value         0.9983   0.9983   0.9963   0.9998   0.9994
+## Prevalence             0.2856   0.1932   0.1759   0.1611   0.1842
+## Detection Rate         0.2845   0.1918   0.1728   0.1609   0.1837
 ## Detection Prevalence   0.2845   0.1935   0.1743   0.1638   0.1839
-## Balanced Accuracy      0.9970   0.9955   0.9944   0.9965   0.9991
+## Balanced Accuracy      0.9979   0.9954   0.9904   0.9978   0.9985
 ```
 
 Let's reduce number of variable to the most importan ones. Let's reduce training and testing set accordingly and validation set on which we make the predictions for the classe variable.
@@ -250,33 +252,33 @@ confusionMatrix(testReduced$classe,predReduced)
 ## 
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 1659    6    8    1    0
-##          B   14 1103   19    3    0
-##          C    1    7 1011    7    0
-##          D    0    2   12  947    3
-##          E    3    3    6    2 1068
+##          A 1656    6   10    2    0
+##          B   15 1100   20    4    0
+##          C    2    9 1007    8    0
+##          D    1    1   14  944    4
+##          E    3    4    5    3 1067
 ## 
 ## Overall Statistics
 ##                                           
-##                Accuracy : 0.9835          
-##                  95% CI : (0.9799, 0.9866)
+##                Accuracy : 0.9811          
+##                  95% CI : (0.9773, 0.9845)
 ##     No Information Rate : 0.285           
 ##     P-Value [Acc > NIR] : < 2.2e-16       
 ##                                           
-##                   Kappa : 0.9792          
-##  Mcnemar's Test P-Value : 0.001294        
+##                   Kappa : 0.9761          
+##  Mcnemar's Test P-Value : 0.001124        
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            0.9893   0.9839   0.9574   0.9865   0.9972
-## Specificity            0.9964   0.9924   0.9969   0.9965   0.9971
-## Pos Pred Value         0.9910   0.9684   0.9854   0.9824   0.9871
-## Neg Pred Value         0.9957   0.9962   0.9907   0.9974   0.9994
-## Prevalence             0.2850   0.1905   0.1794   0.1631   0.1820
-## Detection Rate         0.2819   0.1874   0.1718   0.1609   0.1815
+## Sensitivity            0.9875   0.9821   0.9536   0.9823   0.9963
+## Specificity            0.9957   0.9918   0.9961   0.9959   0.9969
+## Pos Pred Value         0.9892   0.9658   0.9815   0.9793   0.9861
+## Neg Pred Value         0.9950   0.9958   0.9899   0.9965   0.9992
+## Prevalence             0.2850   0.1903   0.1794   0.1633   0.1820
+## Detection Rate         0.2814   0.1869   0.1711   0.1604   0.1813
 ## Detection Prevalence   0.2845   0.1935   0.1743   0.1638   0.1839
-## Balanced Accuracy      0.9929   0.9882   0.9771   0.9915   0.9971
+## Balanced Accuracy      0.9916   0.9870   0.9748   0.9891   0.9966
 ```
 
 ```r
@@ -285,7 +287,7 @@ oose
 ```
 
 ```
-## [1] 0.01648258
+## [1] 0.01886151
 ```
 
 Out of sample error
@@ -296,7 +298,7 @@ oose
 ```
 
 ```
-## [1] 0.01648258
+## [1] 0.01886151
 ```
 
 
